@@ -49,6 +49,10 @@ test.to_csv('AI_part/UNSW_NB15/test_alldata_EDA.csv', index=False)
 train = pd.read_csv('AI_part/UNSW_NB15/train_alldata_EDA.csv')
 test = pd.read_csv('AI_part/UNSW_NB15/test_alldata_EDA.csv')
 
+# attack_cat이 'normal'인 데이터와 아닌 데이터로 분리
+train_normal = train[train['attack_cat'] == 'normal']
+train_attack = train[train['attack_cat'] != 'normal']
+
 # Utility function
 def multi_corr(col1, col2="label", df=train):
     '''
@@ -66,14 +70,23 @@ def corr(col1, col2="label", df=train):
     return df[[col1, col2]].corr().iloc[0,1]
 
 # train dataset의 covariance matrix 계산
-train_numeric = train.apply(pd.to_numeric, errors='coerce')
-corr_matrix = train_numeric.corr().abs()
+train_normal_numeric = train_normal.apply(pd.to_numeric, errors='coerce')
+normal_corr_matrix = train_normal_numeric.corr().abs()
+
+train_attack_numeric = train_attack.apply(pd.to_numeric, errors='coerce')
+attack_corr_matrix = train_attack_numeric.corr().abs()
 
 # 상삼각 행렬 계산
-upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+normal_upper = normal_corr_matrix.where(np.triu(np.ones(normal_corr_matrix.shape), k=1).astype(bool))
+attack_upper = attack_corr_matrix.where(np.triu(np.ones(attack_corr_matrix.shape), k=1).astype(bool))
 
 # 높은 상관관계를 가진 feature 계산
-to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
+normal_to_drop = [column for column in normal_upper.columns if any(normal_upper[column] > 0.95)]
+attack_to_drop = [column for column in attack_upper.columns if any(attack_upper[column] > 0.95)]
+to_drop = list(set(normal_to_drop) & set(attack_to_drop))
+print(normal_to_drop)
+print(attack_to_drop)
+
 saved_dict['corr_col'] = to_drop
 
 # 상관계수가 높은 feature 제거
