@@ -1,0 +1,13 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	dns
+#open	2024-12-01-15-03-17
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	trans_id	rtt	query	qclass	qclass_name	qtype	qtype_name	rcode	rcode_name	AA	TC	RD	RA	Z	answers	TTLs	rejected
+#types	time	string	addr	port	addr	port	enum	count	interval	string	count	string	count	string	count	string	bool	bool	bool	bool	count	vector[string]	vector[interval]	bool
+1732364653.746457	CVtrTU1nCthiXW8uwa	192.168.162.1	5353	224.0.0.251	5353	udp	0	-	_microsoft_mcc._tcp.local	32769	qclass-32769	12	PTR	-	-	F	F	F	F	0	-	-	F
+1732364654.745563	CVtrTU1nCthiXW8uwa	192.168.162.1	5353	224.0.0.251	5353	udp	0	-	_microsoft_mcc._tcp.local	1	C_INTERNET	12	PTR	-	-	F	F	F	F	0	-	-	F
+1732364653.747924	C3jPe53g8QViOmPO72	fe80::57eb:2ffd:c0d4:269e	5353	ff02::fb	5353	udp	0	-	_microsoft_mcc._tcp.local	32769	qclass-32769	12	PTR	-	-	F	F	F	F	0	-	-	F
+1732364654.746712	C3jPe53g8QViOmPO72	fe80::57eb:2ffd:c0d4:269e	5353	ff02::fb	5353	udp	0	-	_microsoft_mcc._tcp.local	1	C_INTERNET	12	PTR	-	-	F	F	F	F	0	-	-	F
+#close	2024-12-01-15-03-17

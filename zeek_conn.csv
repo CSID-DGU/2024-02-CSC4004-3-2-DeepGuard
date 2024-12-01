@@ -1,0 +1,9 @@
+ts,uid,id.orig_h,id.orig_p,id.resp_h,id.resp_p,proto,service,duration,orig_bytes,resp_bytes,conn_state,local_orig,local_resp,missed_bytes,history,orig_pkts,orig_ip_bytes,resp_pkts,resp_ip_bytes,tunnel_parents
+1732364641.585403,ChsCpwKtCratGIBrd,192.168.162.130,50375,52.167.222.13,443,tcp,-,0.185848,0,0,SF,T,F,0,FafA,2,80,2,80,-
+1732364653.746457,CVtrTU1nCthiXW8uwa,192.168.162.1,5353,224.0.0.251,5353,udp,dns,0.999106,86,0,S0,T,F,0,D,2,142,0,0,-
+1732364653.747924,C3jPe53g8QViOmPO72,fe80::57eb:2ffd:c0d4:269e,5353,ff02::fb,5353,udp,dns,0.998788,86,0,S0,T,F,0,D,2,182,0,0,-
+1732364648.765771,CD5pXB2BMWaxD10YL2,192.168.162.130,50376,117.18.232.200,443,tcp,-,-,-,-,OTH,T,F,0,D,1,41,0,0,-
+1732364641.474911,CCcyyGm4cninI7XU9,192.168.162.132,51144,104.18.32.47,443,tcp,-,-,-,-,OTH,T,F,0,^a,0,0,1,40,-
+1732364641.193272,CmOxtW3fJBEpEnpbPi,192.168.162.132,51143,172.64.155.209,443,tcp,-,-,-,-,OTH,T,F,0,^a,0,0,1,40,-
+1732364638.979745,CpGwUA32mB1U2lTjEf,192.168.162.130,50374,3.233.158.25,443,tcp,-,-,-,-,OTH,T,F,0,Da,1,41,1,40,-
+1732364638.792685,CZmLNA2vfH4GTRLO39,192.168.162.130,50343,172.64.155.209,443,tcp,-,-,-,-,OTH,T,F,0,Da,1,41,1,40,-
