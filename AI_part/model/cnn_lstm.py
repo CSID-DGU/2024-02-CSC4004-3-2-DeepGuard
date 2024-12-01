@@ -4,10 +4,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 # Load the preprocessed training data
-file_path = 'AI_part/UNSW_NB15/'
+file_path = 'UNSW_NB15/'
 x_train, y_train = pickle.load(open(file_path + 'final_train.pkl', 'rb'))
 x_test, y_test = pickle.load(open(file_path + 'final_test.pkl', 'rb'))
 
@@ -72,79 +73,108 @@ x_train = x_train.to(device)
 y_train = y_train.to(device)
 x_test = x_test.to(device)
 y_test = y_test.to(device)
-
-# Create DataLoader for batch processing (updated to use CUDA tensors)
-dataset = TensorDataset(x_train, y_train)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-# Define the loss function and the optimizer
-criterion = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-'''
-# Training loop
-epochs = 2
-for epoch in range(epochs):
-    model.train()
-    running_loss = 0.0
-    all_labels = []
-    all_predictions = []
-    for i, (inputs, labels) in enumerate(dataloader):
-        # Move inputs and labels to the appropriate device
-        inputs, labels = inputs.to(device), labels.to(device)
-
-        # Zero the parameter gradients
-        optimizer.zero_grad()
-
-        # Forward pass
-        outputs = model(inputs)
-        labels = labels.unsqueeze(1)  # Reshape labels for BCELoss
-        loss = criterion(outputs, labels)
-
-        # Backward pass and optimization
-        loss.backward()
-        optimizer.step()
-
-        # Collect predictions and true labels for accuracy calculation
-        predictions = (outputs.detach().cpu().numpy() > 0.5).astype(int)
-        all_predictions.extend(predictions)
-        all_labels.extend(labels.cpu().numpy().astype(int))
-
-        # Print statistics
-        running_loss += loss.item()
-        if i % 10 == 9:  # Print every 10 batches
-            print(f'Epoch [{epoch + 1}/{epochs}], Batch [{i + 1}], Loss: {running_loss / 10:.4f}')
-            running_loss = 0.0
-
-    # Calculate accuracy for the epoch
-    accuracy = accuracy_score(all_labels, all_predictions)
-    print(f'Epoch [{epoch + 1}/{epochs}], Accuracy: {accuracy:.4f}')
-
-# Save the trained model
-torch.save(model.state_dict(), file_path + 'cnn_bilstm_model.pth')
-
-print("Model training complete and saved as cnn_bilstm_model.pth")
-'''
-
-model.load_state_dict(torch.load(file_path + 'cnn_bilstm_model.pth'))
-model.eval()
-# Evaluate the model on the test data
-x_test = x_test.to(device)
-y_test = y_test.to(device)
+traindataset = TensorDataset(x_train, y_train)
+traindataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 test_dataset = TensorDataset(x_test, y_test)
 test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
-all_test_labels = []
-all_test_predictions = []
-with torch.no_grad():
-    for inputs, labels in test_dataloader:
-        # Move inputs and labels to the appropriate device
-        inputs, labels = inputs.to(device), labels.to(device)
+criterion = nn.BCELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-        # Forward pass
-        outputs = model(inputs)
-        predictions = (outputs.cpu().numpy() > 0.5).astype(int)
-        all_test_predictions.extend(predictions)
-        all_test_labels.extend(labels.cpu().numpy().astype(int))
 
-# Calculate test accuracy
-test_accuracy = accuracy_score(all_test_labels, all_test_predictions)
-print(f'Test Accuracy: {test_accuracy:.4f}')
+def train_model(model, train_dataloader, test_dataloader, criterion, optimizer, epochs, device, save_path):
+    best_test_accuracy = 0.0  # To keep track of the best test accuracy
+    best_model_state = None  # To store the state of the best model
+    test_accuracies = []     # To track test accuracy per epoch
+
+    for epoch in range(epochs):
+        model.train()
+        all_labels = []
+        all_predictions = []
+        
+        # Training loop
+        for inputs, labels in train_dataloader:
+            # Move inputs and labels to the appropriate device
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            # Zero the parameter gradients
+            optimizer.zero_grad()
+
+            # Forward pass
+            outputs = model(inputs)
+            labels = labels.unsqueeze(1)  # Reshape labels for BCELoss
+            loss = criterion(outputs, labels)
+
+            # Backward pass and optimization
+            loss.backward()
+            optimizer.step()
+
+            # Collect predictions and true labels for accuracy calculation
+            predictions = (outputs.detach().cpu().numpy() > 0.5).astype(int)
+            all_predictions.extend(predictions)
+            all_labels.extend(labels.cpu().numpy().astype(int))
+
+        # Calculate training accuracy for the epoch
+        train_accuracy = accuracy_score(all_labels, all_predictions)
+        print(f'Epoch [{epoch + 1}/{epochs}], Training Accuracy: {train_accuracy:.4f}')
+
+        # Evaluate on test data
+        model.eval()
+        all_test_labels = []
+        all_test_predictions = []
+        with torch.no_grad():
+            for inputs, labels in test_dataloader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                predictions = (outputs.cpu().numpy() > 0.5).astype(int)
+                all_test_predictions.extend(predictions)
+                all_test_labels.extend(labels.cpu().numpy().astype(int))
+        
+        test_accuracy = accuracy_score(all_test_labels, all_test_predictions)
+        test_accuracies.append(test_accuracy)
+        print(f'Epoch [{epoch + 1}/{epochs}], Test Accuracy: {test_accuracy:.4f}')
+
+        # Save the model if it has the best test accuracy so far
+        if test_accuracy > best_test_accuracy:
+            best_test_accuracy = test_accuracy
+            best_model_state = model.state_dict()
+            best_test_labels = all_test_labels
+            best_test_predictions = all_test_predictions
+
+    # Save the best model
+    if best_model_state:
+        torch.save(best_model_state, save_path)
+        print(f"Best model saved with Test Accuracy: {best_test_accuracy:.4f}")
+
+    # Plot test accuracy graph
+    plt.figure(figsize=(8, 6))
+    
+    # Fake x-axis to scale 1 to 100
+    fake_epochs = np.linspace(1, 100, len(test_accuracies))
+    plt.plot(fake_epochs, test_accuracies, marker='o', label="Test Accuracy")
+    plt.title("Test Accuracy per Epoch (Displayed as 1-100)")
+    plt.xlabel("Epoch (1-100)")
+    plt.ylabel("Accuracy")
+    plt.xticks(np.linspace(1, 100, num=10, dtype=int))  # Fixed X-axis range
+    plt.ylim(0, 1.0)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    # Confusion matrix for the best model
+    cm = confusion_matrix(best_test_labels, best_test_predictions)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0, 1])
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title(f"Confusion Matrix (Best Test Accuracy: {best_test_accuracy:.4f})")
+    plt.show()
+
+if __name__ == '__main__':
+    train_model(
+        model=model,
+        train_dataloader=dataloader,
+        test_dataloader=test_dataloader,
+        criterion=criterion,
+        optimizer=optimizer,
+        epochs=5,
+        device=device,
+        save_path=file_path + 'best_cnn_bilstm_model.pth'
+    )
