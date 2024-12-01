@@ -6,7 +6,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import accuracy_score, classification_report
 
-# Load the preprocessed training and test data
 file_path = 'AI_part/UNSW_NB15/'
 x_train, y_train = pickle.load(open(file_path + 'final_train.pkl', 'rb'))
 x_test, y_test = pickle.load(open(file_path + 'final_test.pkl', 'rb'))

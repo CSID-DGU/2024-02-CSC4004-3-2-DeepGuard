@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-# Load the preprocessed training data
 file_path = 'UNSW_NB15/'
 x_train, y_train = pickle.load(open(file_path + 'final_train.pkl', 'rb'))
 x_test, y_test = pickle.load(open(file_path + 'final_test.pkl', 'rb'))

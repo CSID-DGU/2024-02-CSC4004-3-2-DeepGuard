@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox
 import random  # 테스트용 랜덤 상태값 생성
 
-# 실시간 탐지 상태를 위한 전역 변수
 is_detection = False
 
 # 상태에 따른 UI 업데이트
